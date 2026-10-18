@@ -1,6 +1,8 @@
-def main():
-    print("Portfolio Analytics Platform")
+from fastapi import FastAPI
+
+app = FastAPI(title="Portfolio Analytics API")
 
 
-if __name__ == "__main__":
-    main()
+@app.get("/health")
+def health_check():
+    return {"status": "ok"}
