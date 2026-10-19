@@ -2,6 +2,7 @@
 import pandas as pd
 import streamlit as st
 import plotly.express as px
+from performance import calculate_performance
 
 from analytics import (
     validate_transactions,
@@ -135,16 +136,16 @@ total_value = market_values.sum()
 
 allocation = market_values / total_value
 
-# Simulation assumes current holdings existed throughout
-# the historical price period.
-portfolio_history = prices.mul(
-    holdings, axis=1
-).sum(axis=1)
+try:
+    performance = calculate_performance(transactions, prices)
+except ValueError as error:
+    st.error(str(error))
+    st.stop()
 
-# Reuse the tested function from analytics.py
-volatility, max_drawdown = calculate_risk(
-    portfolio_history
-)
+portfolio_history = performance["portfolio_value"]
+return_index = performance["return_index"]
+
+volatility, max_drawdown = calculate_risk(return_index)
 
 
 # 7. Display dashboard
@@ -170,6 +171,11 @@ c.metric(
 st.subheader("Portfolio Value")
 
 st.line_chart(portfolio_history)
+st.subheader("Time-Weighted Performance")
+st.line_chart(return_index)
+
+total_return = return_index.iloc[-1] / 100 - 1
+st.metric("Investment Return", f"{total_return:.2%}")
 
 
 # 9. Asset allocation
@@ -206,9 +212,9 @@ st.dataframe(
 
 # 11. Limitations
 st.caption(
-    "Uses sample data by default. Historical portfolio values "
-    "assume current holdings were held throughout the price "
-    "period. Risk metrics are based on this hypothetical "
-    "buy-and-hold portfolio, not actual transaction timing. "
-    "Excludes fees, dividends, cash balances, and cash-flow effects."
+    "Demonstration data only. Transactions are assumed to "
+    "execute at daily closing prices. Returns exclude "
+    "the impact of contributions and withdrawals. "
+    "Fees, dividends, currencies, and cash balances "
+    "are not modeled."
 )
