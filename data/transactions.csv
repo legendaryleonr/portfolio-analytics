@@ -1,4 +1,4 @@
-symbol,type,quantity,price
-AAPL,BUY,5,180
-MSFT,BUY,3,400
-GOOGL,BUY,4,160
+date,symbol,type,quantity,price
+2026-07-01,AAPL,BUY,5,180
+2026-07-01,MSFT,BUY,3,400
+2026-07-01,GOOGL,BUY,4,160

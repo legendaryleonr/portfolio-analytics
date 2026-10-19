@@ -3,7 +3,11 @@ import pandas as pd
 import streamlit as st
 import plotly.express as px
 
-from analytics import calculate_holdings, calculate_risk
+from analytics import (
+    validate_transactions,
+    calculate_holdings,
+    calculate_risk,
+)
 
 
 # 1. Page setup
@@ -32,7 +36,7 @@ prices = pd.read_csv(
 
 
 # 3. Validate inputs
-required = {"symbol", "type", "quantity", "price"}
+required = {"date", "symbol", "type", "quantity", "price"}
 
 if not required.issubset(transactions.columns):
     st.error("Transactions CSV is missing required columns.")
@@ -72,6 +76,12 @@ if transactions["symbol"].isna().any():
 
 
 # 4. Calculate holdings
+try:
+    transactions = validate_transactions(transactions)
+except ValueError as error:
+    st.error(str(error))
+    st.stop()
+
 holdings = calculate_holdings(transactions)
 
 if (holdings < 0).any():
